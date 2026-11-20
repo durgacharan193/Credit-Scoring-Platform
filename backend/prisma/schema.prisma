@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BORROWER
+  LENDER
+  BANK_OFFICER
+}
+
+enum TransactionType {
+  LOAN
+  REPAYMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum ConsentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  borrowerTransactions Transaction[]    @relation("BorrowerTransactions")
+  lenderTransactions   Transaction[]    @relation("LenderTransactions")
+  consentRequests      ConsentRequest[] @relation("BorrowerConsents")
+  bankOfficerRequests  ConsentRequest[] @relation("BankOfficerConsents")
+  creditReport         CreditReport?
+}
+
+model Transaction {
+  id           String            @id @default(uuid())
+  borrowerId   String
+  lenderId     String
+  amount       Decimal           @db.Decimal(12, 2)
+  type         TransactionType
+  status       TransactionStatus @default(PENDING)
+  description  String?
+  dueDate      DateTime?
+  verifiedAt   DateTime?
+  previousHash String
+  currentHash  String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  borrower User @relation("BorrowerTransactions", fields: [borrowerId], references: [id])
+  lender   User @relation("LenderTransactions", fields: [lenderId], references: [id])
+
+  @@index([borrowerId])
+  @@index([lenderId])
+  @@index([status])
+}
+
+model ConsentRequest {
+  id             String        @id @default(uuid())
+  borrowerId     String
+  bankOfficerId  String
+  status         ConsentStatus @default(PENDING)
+  consentToken   String?
+  tokenExpiresAt DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  borrower    User @relation("BorrowerConsents", fields: [borrowerId], references: [id])
+  bankOfficer User @relation("BankOfficerConsents", fields: [bankOfficerId], references: [id])
+}
+
+model CreditReport {
+  id                String   @id @default(uuid())
+  borrowerId        String   @unique
+  score             Int      @default(300)
+  riskTier          String   @default("UNRATED")
+  punctualityPct    Float    @default(0)
+  uniqueLenderCount Int      @default(0)
+  totalLoans        Int      @default(0)
+  totalRepayments   Int      @default(0)
+  collusionFlag     Boolean  @default(false)
+  hashChainValid    Boolean  @default(true)
+  lastCalculatedAt  DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  borrower User @relation(fields: [borrowerId], references: [id])
+}
