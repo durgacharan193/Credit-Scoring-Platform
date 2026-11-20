@@ -1,0 +1,7 @@
+{
+  "title": "Backend API Performance",
+  "panels": [
+    { "title": "Requests / sec", "type": "timeseries" },
+    { "title": "5xx Error Spike", "type": "timeseries" }
+  ]
+}
