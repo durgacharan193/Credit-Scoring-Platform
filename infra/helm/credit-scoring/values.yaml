@@ -1,0 +1,7 @@
+global:
+  environment: staging
+  region: ap-south-1
+backend:
+  replicaCount: 3
+scoringService:
+  replicaCount: 2
