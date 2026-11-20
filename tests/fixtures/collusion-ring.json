@@ -1,0 +1,5 @@
+{
+  "ringId": "ring-901",
+  "participants": ["borrower-a", "lender-b", "borrower-c"],
+  "cycleDetected": true
+}
