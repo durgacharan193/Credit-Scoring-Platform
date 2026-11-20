@@ -1,0 +1,7 @@
+{
+  "title": "Scoring Engine ML Health",
+  "panels": [
+    { "title": "Inference Latency P99", "type": "timeseries" },
+    { "title": "Population Stability Index", "type": "gauge" }
+  ]
+}
