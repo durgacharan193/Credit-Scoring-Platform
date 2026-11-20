@@ -1,0 +1,5 @@
+{
+  "scenario": "REDIS_OUTAGE",
+  "fallbackBehavior": "IN_MEMORY_DEGRADED",
+  "toleratedDurationSec": 120
+}
