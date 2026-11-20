@@ -1,0 +1,9 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: backend-delay
+spec:
+  action: delay
+  mode: one
+  delay:
+    latency: '100ms'
