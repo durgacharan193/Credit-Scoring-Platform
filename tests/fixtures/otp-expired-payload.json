@@ -1,0 +1,5 @@
+{
+  "phone": "+919876543210",
+  "otp": "000000",
+  "expectedError": "OTP_EXPIRED"
+}
