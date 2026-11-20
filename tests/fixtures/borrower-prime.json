@@ -1,0 +1,7 @@
+{
+  "id": "borrower-prime",
+  "repaymentHistoryRatio": 0.99,
+  "monthlyRevenueVariance": 0.08,
+  "outstandingLoans": 0,
+  "expectedTier": "A+"
+}
