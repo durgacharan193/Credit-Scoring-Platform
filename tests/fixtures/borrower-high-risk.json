@@ -1,0 +1,7 @@
+{
+  "id": "borrower-high-risk",
+  "repaymentHistoryRatio": 0.42,
+  "monthlyRevenueVariance": 0.85,
+  "outstandingLoans": 4,
+  "expectedTier": "D"
+}
