@@ -1,0 +1,9 @@
+name: Ephemeral Preview Environment
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "Provisioning preview namespace..."
