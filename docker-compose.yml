@@ -1,0 +1,127 @@
+version: "3.9"
+
+networks:
+  credit-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: credit_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: creditdb
+      POSTGRES_USER: credituser
+      POSTGRES_PASSWORD: creditpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - credit-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U credituser -d creditdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: credit_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - credit-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: credit_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: credituser
+      RABBITMQ_DEFAULT_PASS: creditpass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - credit-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: credit_backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://credituser:creditpass@postgres:5432/creditdb?schema=public
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://credituser:creditpass@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-changeme_jwt_secret_at_least_32chars}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      OTP_TTL_SECONDS: ${OTP_TTL_SECONDS:-600}
+    networks:
+      - credit-net
+
+  scoring-service:
+    build:
+      context: ./scoring-service
+      dockerfile: Dockerfile
+    container_name: credit_scoring
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://credituser:creditpass@postgres:5432/creditdb
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://credituser:creditpass@rabbitmq:5672
+      PYTHONUNBUFFERED: "1"
+    networks:
+      - credit-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: credit_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NODE_ENV: production
+    networks:
+      - credit-net
