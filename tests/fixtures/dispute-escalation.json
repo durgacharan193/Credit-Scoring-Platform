@@ -1,0 +1,6 @@
+{
+  "disputeId": "disp-501",
+  "reason": "PAYMENT_NOT_CREDITED",
+  "amount": 15000,
+  "status": "ESCALATED"
+}
