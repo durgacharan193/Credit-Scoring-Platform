@@ -1,0 +1,15 @@
+# Local development docker-compose overrides
+version: '3.8'
+
+services:
+  backend:
+    volumes:
+      - ./backend/src:/app/src
+    environment:
+      - NODE_ENV=development
+
+  frontend:
+    volumes:
+      - ./frontend/src:/app/src
+    environment:
+      - NODE_ENV=development
