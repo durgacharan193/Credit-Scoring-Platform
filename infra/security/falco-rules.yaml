@@ -1,0 +1,5 @@
+- rule: Unauthorized Shell Spawn
+  desc: Detect shell spawned inside credit scoring container
+  condition: container and proc.name in (bash, sh, zsh)
+  output: Shell opened in container (user=%user.name)
+  priority: WARNING
