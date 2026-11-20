@@ -1,0 +1,8 @@
+openapi: 3.0.3
+info:
+  title: Webhooks API
+  version: 1.0.0
+paths:
+  /api/webhooks:
+    post:
+      summary: Register webhook subscriber
