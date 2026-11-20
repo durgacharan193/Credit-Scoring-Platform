@@ -1,0 +1,8 @@
+openapi: 3.0.3
+info:
+  title: Scoring Service API
+  version: 1.0.0
+paths:
+  /api/score/evaluate:
+    post:
+      summary: Evaluate credit score
